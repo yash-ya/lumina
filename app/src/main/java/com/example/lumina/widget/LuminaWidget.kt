@@ -36,6 +36,11 @@ import androidx.glance.text.FontFamily
 import com.example.lumina.data.AppFont
 import com.example.lumina.data.BackgroundType
 import com.example.lumina.data.GradientPreset
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.ColorFilter
+import androidx.glance.layout.size
+import com.example.lumina.R
 
 class LuminaWidget : GlanceAppWidget() {
 
@@ -72,6 +77,15 @@ class LuminaWidget : GlanceAppWidget() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (style.showLogo) {
+                            Image(
+                                provider = ImageProvider(R.drawable.ic_lumina_logo),
+                                contentDescription = "Lumina Logo",
+                                modifier = GlanceModifier.size(32.dp).padding(bottom = 8.dp),
+                                colorFilter = ColorFilter.tint(ColorProvider(contentColor))
+                            )
+                        }
+
                         Text(
                             text = quote?.let { "“${it.text}”" } ?: "Open Lumina for your daily spark",
                             style = TextStyle(
