@@ -1,15 +1,49 @@
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# Android Studio / IntelliJ IDEA
+*.ipr
+*.iws
+out/
+
+# Kotlin
+.kotlin/
+kotlin-js-store/
+
+# Gradle
+.gradle/
+build/
+
+# Log files
+*.log
+
+# Keystore files
+*.jks
+*.keystore
+*.pk8
+*.p12
+
+# Google Services
+google-services.json
+
+# User-specific stuff
+.idea/shelf/
+.idea/caches/
+.idea/libraries/
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/modules.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usageTracker.xml
+
+# Captures and data
+*.hprof
