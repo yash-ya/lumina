@@ -11,12 +11,20 @@ data class WidgetStyle(
     val backgroundColor: Int = 0xFFF8F1E7.toInt(), // SoftCream
     val backgroundGradient: GradientPreset = GradientPreset.SUNRISE,
     val transparency: Float = 1.0f,
-    val useSerifFont: Boolean = true,
+    val appFont: AppFont = AppFont.PLAYFAIR,
     val fontSize: Int = 16,
     val adaptiveColor: Boolean = true,
     val showAuthor: Boolean = true,
     val showLogo: Boolean = false
 )
+
+@Serializable
+enum class AppFont {
+    PLAYFAIR,
+    MONTSERRAT,
+    SERIF,
+    SANS_SERIF
+}
 
 @Serializable
 enum class BackgroundType {

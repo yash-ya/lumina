@@ -22,10 +22,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.lumina.data.AppFont
 import com.example.lumina.data.BackgroundType
 import com.example.lumina.data.GradientPreset
 import com.example.lumina.data.WidgetStyle
 import com.example.lumina.ui.theme.LuminaTheme
+import com.example.lumina.ui.theme.MontserratFont
+import com.example.lumina.ui.theme.PlayfairDisplayFont
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,7 +135,12 @@ fun WidgetPreview(style: WidgetStyle) {
                 Text(
                     text = "“The soul becomes dyed with the color of its thoughts.”",
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontFamily = if (style.useSerifFont) FontFamily.Serif else FontFamily.SansSerif,
+                        fontFamily = when (style.appFont) {
+                            AppFont.PLAYFAIR -> PlayfairDisplayFont
+                            AppFont.MONTSERRAT -> MontserratFont
+                            AppFont.SERIF -> FontFamily.Serif
+                            AppFont.SANS_SERIF -> FontFamily.SansSerif
+                        },
                         fontSize = style.fontSize.sp,
                         textAlign = TextAlign.Center
                     ),
@@ -282,19 +291,29 @@ fun getGradientBrush(preset: GradientPreset): Brush {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TypographyTab(style: WidgetStyle, onStyleChange: (WidgetStyle) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Use Serif Font", style = MaterialTheme.typography.bodyLarge)
-            Switch(
-                checked = style.useSerifFont,
-                onCheckedChange = { onStyleChange(style.copy(useSerifFont = it)) }
-            )
+        Column {
+            Text("Font Family", style = MaterialTheme.typography.labelMedium)
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AppFont.entries.forEach { font ->
+                    FilterChip(
+                        selected = style.appFont == font,
+                        onClick = { onStyleChange(style.copy(appFont = font)) },
+                        label = { 
+                            Text(font.name.replace("_", " ").lowercase(Locale.ROOT)
+                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }) 
+                        }
+                    )
+                }
+            }
         }
 
         Column {

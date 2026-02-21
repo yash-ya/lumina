@@ -23,11 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.lumina.data.AppFont
 import com.example.lumina.data.Quote
+import com.example.lumina.data.WidgetStyle
 import com.example.lumina.ui.theme.LuminaTheme
+import com.example.lumina.ui.theme.MontserratFont
+import com.example.lumina.ui.theme.PlayfairDisplayFont
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -86,6 +91,7 @@ fun AuroraBackground() {
 @Composable
 fun HomeScreen(
     quote: Quote?,
+    style: WidgetStyle,
     isSaved: Boolean,
     onRefresh: () -> Unit,
     onToggleSave: () -> Unit,
@@ -93,6 +99,13 @@ fun HomeScreen(
     onOpenSaved: () -> Unit,
     onShare: () -> Unit
 ) {
+    val currentFontFamily = when (style.appFont) {
+        AppFont.PLAYFAIR -> PlayfairDisplayFont
+        AppFont.MONTSERRAT -> MontserratFont
+        AppFont.SERIF -> FontFamily.Serif
+        AppFont.SANS_SERIF -> FontFamily.SansSerif
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         AuroraBackground()
 
@@ -185,7 +198,9 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = targetQuote?.let { "“${it.text}”" } ?: "Loading...",
-                            style = MaterialTheme.typography.displayLarge,
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontFamily = currentFontFamily
+                            ),
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onBackground
                         )
@@ -199,7 +214,9 @@ fun HomeScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             text = targetQuote?.author?.uppercase() ?: "",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontFamily = currentFontFamily
+                            ),
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                         )
                     }
@@ -215,6 +232,7 @@ fun HomeScreenPreview() {
     LuminaTheme {
         HomeScreen(
             quote = Quote(1, "The soul becomes dyed with the color of its thoughts.", "Marcus Aurelius"),
+            style = WidgetStyle(),
             isSaved = false,
             onRefresh = {},
             onToggleSave = {},

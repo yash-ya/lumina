@@ -1,5 +1,6 @@
 package com.example.lumina
 
+import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -18,7 +19,6 @@ import com.example.lumina.ui.SavedQuotesScreen
 import com.example.lumina.ui.WidgetStudioScreen
 import com.example.lumina.ui.theme.LuminaTheme
 import com.example.lumina.widget.LuminaWidget
-import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.launch
 
 enum class Screen {
@@ -37,8 +37,15 @@ class MainActivity : ComponentActivity() {
         val widgetStyleRepository = WidgetStyleRepository(this)
         val savedQuotesRepository = SavedQuotesRepository(this)
         
-        // Check if we were launched from the widget's edit button
-        val initialScreen = if (intent?.getBooleanExtra("open_widget_studio", false) == true) {
+        // Handle widget configuration
+        val appWidgetId = intent?.extras?.getInt(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID
+        ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
+
+        // Check if we were launched from the widget's edit button or as a configuration activity
+        val initialScreen = if (intent?.getBooleanExtra("open_widget_studio", false) == true || 
+            appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             Screen.WidgetStudio
         } else {
             Screen.Home
@@ -54,6 +61,7 @@ class MainActivity : ComponentActivity() {
                 when (currentScreen) {
                     Screen.Home -> HomeScreen(
                         quote = currentQuote,
+                        style = widgetStyle,
                         isSaved = currentQuote?.let { savedQuotesRepository.isQuoteSaved(it.id) } ?: false,
                         onRefresh = { currentQuote = quoteRepository.getRandomQuote() },
                         onToggleSave = {
@@ -90,12 +98,37 @@ class MainActivity : ComponentActivity() {
                             widgetStyleRepository.saveStyle(style)
                             widgetStyle = style
                             Toast.makeText(this@MainActivity, "Widget style saved!", Toast.LENGTH_SHORT).show()
+                            
                             // Update the home screen widget
                             lifecycleScope.launch {
                                 LuminaWidget().updateAll(this@MainActivity)
                             }
+
+                            // If we were configuring a widget, set the result and finish
+                            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                                val resultValue = Intent().apply {
+                                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                                }
+                                setResult(RESULT_OK, resultValue)
+                                finish()
+                            } else {
+                                // "Take me to the widget" - Navigate back to Home screen to see reflect changes
+                                currentScreen = Screen.Home
+                                
+                                // Alternatively, if they literally mean the device home screen:
+                                // val startMain = Intent(Intent.ACTION_MAIN)
+                                // startMain.addCategory(Intent.CATEGORY_HOME)
+                                // startMain.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                // startActivity(startMain)
+                            }
                         },
-                        onBack = { currentScreen = Screen.Preferences }
+                        onBack = { 
+                            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                                finish()
+                            } else {
+                                currentScreen = Screen.Preferences 
+                            }
+                        }
                     )
                     Screen.SavedQuotes -> SavedQuotesScreen(
                         savedQuotes = savedQuotes,
@@ -108,12 +141,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        // This is not handled by the setContent block above automatically if the activity is already running.
-        // For simplicity in this demo, we'll just check it in onCreate, 
-        // but normally you'd want to handle it here too if launchMode is singleTop/Task.
     }
 }
